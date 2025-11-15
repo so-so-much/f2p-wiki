@@ -7,7 +7,7 @@ body {
   color: #969696;
 
   background-color: #000;
-  background-image: url("/background_tile.jpg");
+  background-image: url("./assets/background_tile.jpg");
   background-position-x: center;
   background-repeat: repeat-y;
 }
