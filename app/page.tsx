@@ -75,6 +75,7 @@ async function fetchTopPage(): Promise<Player[]> {
     {
       headers: {
         "Content-Type": "application/json",
+        "User-Agent": "sosomuch",
       },
     }
   );
