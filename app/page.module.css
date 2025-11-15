@@ -1,0 +1,12 @@
+.layout {
+  display: flex;
+  gap: 1rem;
+}
+
+.layout .sidebar {
+  flex: 1 0 0;
+}
+
+.layout .content {
+  flex: 2 0 0;
+}

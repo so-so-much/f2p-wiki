@@ -14,13 +14,13 @@
     "react-dom": "19.2.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "classnames": "^2.5.1",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
-    "tailwindcss": "^4",
+    "the-new-css-reset": "^1.11.3",
     "typescript": "^5"
   }
 }

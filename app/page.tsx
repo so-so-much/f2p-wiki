@@ -1,65 +1,95 @@
-import Image from "next/image";
+"use client";
+
+import { HeaderBanner } from "@/components/header/header_banner";
+import { GlobalNav } from "@/components/nav/global_nav";
+import { ScrollBlock } from "@/components/scroll_block/scroll_block";
+import styles from "./page.module.css";
+import { useQuery } from "@/hooks/use_query/use_query";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <HeaderBanner />
+      <GlobalNav />
+      <div className={styles.layout}>
+        <div className={styles.sidebar}></div>
+        <div className={styles.content}>
+          <ScrollBlock>
+            <TopPlayers />
+          </ScrollBlock>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
+}
+
+function TopPlayers() {
+  const topPlayersQuery = useQuery(fetchTopPage);
+
+  switch (topPlayersQuery.status) {
+    case "pending":
+      return <div>Loading...</div>;
+    case "error":
+      return <div>Error fetching players</div>;
+    case "success":
+      return (
+        <table>
+          <thead>
+            <tr>
+              <th align="right">Rank</th>
+              <th>Name</th>
+              <th align="center">Account Type</th>
+              <th align="right">Overall EHP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topPlayersQuery.response.map((player, index) => (
+              <tr key={index}>
+                <td align="right">{player.rank.toLocaleString()}</td>
+                <td>{player.displayName}</td>
+                <td align="center">{player.accType}</td>
+                <td align="right">
+                  {player.ehp.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+  }
+}
+
+type Player = {
+  rank: number;
+  displayName: string;
+  accType: string | undefined;
+  ehp: number;
+};
+
+async function fetchTopPage(): Promise<Player[]> {
+  const respRaw = await fetch(
+    "https://api.wiseoldman.net/v2/efficiency/leaderboard?metric=ehp&playerBuild=f2p&limit=25",
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const resp: unknown = await respRaw.json();
+
+  // todo: zod schemas?
+  if (!Array.isArray(resp)) {
+    throw new Error("Malfomred response");
+  }
+
+  return resp.map((player, index) => ({
+    rank: index + 1,
+    displayName: player?.displayName ?? "Unknown player",
+    accType: player?.type,
+    ehp: player?.ehp ?? -1,
+  }));
 }

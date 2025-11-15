@@ -1,0 +1,24 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-width: 379px;
+}
+
+.end {
+  aspect-ratio: calc(379 / 36);
+  background-image: url("/scroll_end.gif");
+  background-size: 100%;
+}
+
+.end.flipped {
+  transform: rotate(180deg);
+}
+
+.content {
+  padding: 1rem;
+
+  background-image: url("/scroll_background.gif");
+  background-size: 100%;
+  background-repeat: repeat-y;
+  color: #000;
+}
